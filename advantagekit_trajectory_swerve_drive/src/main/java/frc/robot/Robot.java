@@ -161,7 +161,7 @@ public class Robot extends LoggedRobot {
     return autonTimer;
   }
 
- // public static AHRS getNavXObject() 
+ // public static AHRS getNavXInstance() 
   {
    // return navX;
   }

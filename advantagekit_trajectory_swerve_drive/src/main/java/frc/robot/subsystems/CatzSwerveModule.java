@@ -128,7 +128,7 @@ public class CatzSwerveModule
         currentAngle = ((magEnc.get() - WHEEL_OFFSET) * 360.0) - gyroAngle;
         // find closest angle to target angle
         angleError = closestAngle(currentAngle, target);
-
+        
         // find closest angle to target angle + 180
         flippedAngleError = closestAngle(currentAngle, target + 180.0);
 

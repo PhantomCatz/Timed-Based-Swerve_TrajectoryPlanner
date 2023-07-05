@@ -86,7 +86,6 @@ public class CatzDriveTrainSubsystem extends SubsystemBase
   @Override
   public void periodic() 
   {
-    // This method will be called once per scheduler run
     smartDashboardDriveTrain();
     smartDashboardDriveTrain_DEBUG();
   }
@@ -216,6 +215,7 @@ public class CatzDriveTrainSubsystem extends SubsystemBase
       RT_FRNT_MODULE.setBrakeMode();
       RT_BACK_MODULE.setBrakeMode();
   }
+
   public void setCoastMode()
   {
       LT_FRNT_MODULE.setCoastMode();
@@ -246,13 +246,14 @@ public class CatzDriveTrainSubsystem extends SubsystemBase
 
   public void zeroGyro()
   {
- //     Robot.navX.setAngleAdjustment(-Robot.navX.getYaw());
+      Robot.navX.setAngleAdjustment(-Robot.navX.getYaw());
   }
 
-  //public double getGyroAngle()
+  public double getGyroAngle()
   {
-   //   return Robot.navX.getAngle();
+      return Robot.navX.getAngle();
   }
+  
 
   public void autoDrive(double power)
   {
@@ -264,6 +265,86 @@ public class CatzDriveTrainSubsystem extends SubsystemBase
       setDrivePower(power);
   }
 
+
+
+  public void lockWheels()
+  {
+      LT_FRNT_MODULE.setWheelAngle(-45.0, NOT_FIELD_RELATIVE);
+      LT_BACK_MODULE.setWheelAngle(45.0, NOT_FIELD_RELATIVE);
+      RT_FRNT_MODULE.setWheelAngle(-135.0, NOT_FIELD_RELATIVE);
+      RT_BACK_MODULE.setWheelAngle(135.0, NOT_FIELD_RELATIVE);
+  }
+
+  public void setSwerveModuleStates(SwerveModuleState[] states)
+  {
+      SwerveDriveKinematics.desaturateWheelSpeeds(states, CatzConstants.MAX_SPEED);
+
+      for(int i = 0; i < 4; i++)
+      {
+          swerveModules[i].setDesiredState(states[i]);
+      }
+  }
+
+  private void resetMagEncoders()
+  {
+      for(CatzSwerveModule module : swerveModules)
+      {
+          module.resetMagEnc();
+      }
+  }
+
+  public void resetDriveEncs()
+  {
+      for(CatzSwerveModule module : swerveModules)
+      {
+          module.resetDriveEncs();
+      }
+  }
+
+  public void initializeOffsets()
+  {
+      Robot.navX.setAngleAdjustment(-Robot.navX.getYaw());
+
+      for(CatzSwerveModule module : swerveModules)
+      {
+          module.initializeOffset();
+      }
+  }
+
+  public SwerveModuleState[] getModuleStates()
+  {
+      SwerveModuleState[] moduleStates = new SwerveModuleState[4];
+
+      for(int i = 0; i < 4; i++)
+      {
+          moduleStates[i] = swerveModules[i].getModuleState();
+      }
+
+      return moduleStates;
+  }
+
+  public SwerveModulePosition[] getModulePositions()
+  {
+      SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
+
+      for(int i = 0; i < 4; i++)
+      {
+          modulePositions[i] = swerveModules[i].getModulePosition();
+      }
+
+      return modulePositions;
+  }
+
+
+  public static CatzDriveTrainSubsystem getInstance() //TBD why are we making a new instance here when we already instanciate it in robot.java or robotcontainer
+  {
+      if(instance == null)
+      {
+          instance = new CatzDriveTrainSubsystem();
+      }
+
+      return instance;
+  }
 
   public double calcJoystickAngle(double xJoy, double yJoy)
   {
@@ -298,90 +379,6 @@ public class CatzDriveTrainSubsystem extends SubsystemBase
   public double calcJoystickPower(double xJoy, double yJoy)
   {
     return (Math.sqrt(Math.pow(xJoy, 2) + Math.pow(yJoy, 2)));
-  }
-
-  public void lockWheels()
-  {
-      LT_FRNT_MODULE.setWheelAngle(-45.0, NOT_FIELD_RELATIVE);
-      LT_BACK_MODULE.setWheelAngle(45.0, NOT_FIELD_RELATIVE);
-      RT_FRNT_MODULE.setWheelAngle(-135.0, NOT_FIELD_RELATIVE);
-      RT_BACK_MODULE.setWheelAngle(135.0, NOT_FIELD_RELATIVE);
-  }
-
-  public void setSwerveModuleStates(SwerveModuleState[] states)
-  {
-      SwerveDriveKinematics.desaturateWheelSpeeds(states, CatzConstants.MAX_SPEED);
-
-      for(int i = 0; i < 4; i++)
-      {
-          swerveModules[i].setDesiredState(states[i]);
-      }
-  }
-
-  private void resetMagEncs()
-  {
-      for(CatzSwerveModule module : swerveModules)
-      {
-          module.resetMagEnc();
-      }
-  }
-
-  public void resetDriveEncs()
-  {
-      for(CatzSwerveModule module : swerveModules)
-      {
-          module.resetDriveEncs();
-      }
-  }
-
-  public void initializeOffsets()
-  {
-      Robot.navX.setAngleAdjustment(-Robot.navX.getYaw());
-
-      for(CatzSwerveModule module : swerveModules)
-      {
-          module.initializeOffset();
-      }
-  }
-
-  public double getGyroAngle()
-  {
-      return Robot.navX.getAngle();
-  }
-
-  public SwerveModuleState[] getModuleStates()
-  {
-      SwerveModuleState[] moduleStates = new SwerveModuleState[4];
-
-      for(int i = 0; i < 4; i++)
-      {
-          moduleStates[i] = swerveModules[i].getModuleState();
-      }
-
-      return moduleStates;
-  }
-
-  public SwerveModulePosition[] getModulePositions()
-  {
-      SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
-
-      for(int i = 0; i < 4; i++)
-      {
-          modulePositions[i] = swerveModules[i].getModulePosition();
-      }
-
-      return modulePositions;
-  }
-
-
-  public static CatzDriveTrainSubsystem getInstance()
-  {
-      if(instance == null)
-      {
-          instance = new CatzDriveTrainSubsystem();
-      }
-
-      return instance;
   }
 }
 
