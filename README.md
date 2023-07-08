@@ -1,4 +1,4 @@
-# Swerve advantage kit code
+# Swerve advantage kit/trajectory code
 
 Swerve advantage kit model
 
@@ -7,3 +7,6 @@ Code is written in cmd based(for testing and for easier out of the box organizat
 Currenly working out the logic of the entire code structure
 
 Will mostly likely need to split the code in order fix issues with advantagekit and trajectory planner indiviually
+
+
+7/8/2023 deleted files as merging opened up more problems than expected
