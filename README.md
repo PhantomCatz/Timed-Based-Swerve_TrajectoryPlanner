@@ -1,6 +1,6 @@
-# Trajectory-Planner
+# Swerve advantage kit code
 
-Combines advantage kit cmd based framework with trajectory planner code
+Swerve advantage kit model
 
 Code is written in cmd based(for testing and for easier out of the box organization)
 
