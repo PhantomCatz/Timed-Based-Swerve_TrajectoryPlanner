@@ -1,12 +1,9 @@
-# Swerve advantage kit/trajectory code
+# Swerve trajectory code
 
-Swerve advantage kit model
+Trajectory model
 
-Code is written in cmd based(for testing and for easier out of the box organization)
-
-Currenly working out the logic of the entire code structure
-
-Will mostly likely need to split the code in order fix issues with advantagekit and trajectory planner indiviually
+Code is written in timed based(code orange abstract mechanism reference)
 
 
-7/8/2023 deleted files as merging opened up more problems than expected
+
+7/8/2023 deleted files that combined advantage kit with trajectory as merging opened up more problems than expected
