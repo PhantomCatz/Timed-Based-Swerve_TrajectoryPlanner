@@ -3,7 +3,6 @@ package frc.Autonomous;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.Timer;
 import frc.Mechanisms.AbstractMechanism;
 import frc.Mechanisms.CatzDrivetrain;
 import frc.robot.CatzConstants;

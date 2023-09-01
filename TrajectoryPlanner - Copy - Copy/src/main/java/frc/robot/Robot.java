@@ -54,6 +54,14 @@ public class Robot extends TimedRobot {
     robotTracker.resetPosition(new Pose2d());
   }
 
+  @Override 
+  public void robotPeriodic(){
+    SmartDashboard.putNumber("Left Back", drivetrain.LT_BACK_MODULE.getCurrentRotation().getDegrees());
+    SmartDashboard.putNumber("Left Front", drivetrain.LT_FRNT_MODULE.getCurrentRotation().getDegrees());
+    SmartDashboard.putNumber("Right Back", drivetrain.RT_BACK_MODULE.getCurrentRotation().getDegrees());
+    SmartDashboard.putNumber("Right Front", drivetrain.RT_FRNT_MODULE.getCurrentRotation().getDegrees());
+  }
+
   @Override
   public void autonomousInit()
   {

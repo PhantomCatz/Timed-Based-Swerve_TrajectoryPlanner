@@ -12,7 +12,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import frc.Utils.Conversions;
@@ -57,7 +56,7 @@ public class CatzSwerveModule {
 
         DRIVE_MOTOR.config_kP(0, 0.1);
         DRIVE_MOTOR.config_kI(0, 0);
-        DRIVE_MOTOR.config_kD(0, 0);
+        DRIVE_MOTOR.config_kD(0, 0); 
 
         steeringPID = new PIDController(kP, kI, kD);
         
@@ -75,9 +74,9 @@ public class CatzSwerveModule {
         double velocity = Conversions.MPSToFalcon(desiredState.speedMetersPerSecond, CatzConstants.DRVTRAIN_WHEEL_CIRCUMFERENCE, CatzConstants.SDS_L2_GEAR_RATIO);
         DRIVE_MOTOR.set(ControlMode.Velocity, velocity);
 
-        double targetAngle = (Math.abs(desiredState.speedMetersPerSecond) <= (CatzConstants.MAX_SPEED * 0.01)) ? getCurrentRotation().getDegrees() : desiredState.angle.getDegrees(); //Prevent rotating module if speed is less then 1%. Prevents Jittering.
+        // double targetAngle = (Math.abs(desiredState.speedMetersPerSecond) <= (CatzConstants.MAX_SPEED * 0.01)) ? getCurrentRotation().getDegrees() : desiredState.angle.getDegrees(); //Prevent rotating module if speed is less then 1%. Prevents Jittering.
 
-        double steerCommand = - steeringPID.calculate(getCurrentRotation().getDegrees(), targetAngle);
+        double steerCommand = - steeringPID.calculate(getCurrentRotation().getDegrees(), desiredState.angle.getDegrees());
         steerCommand = Math.max(-1.0, Math.min(1.0, steerCommand));
         STEER_MOTOR.set(steerCommand);
     }
@@ -107,7 +106,7 @@ public class CatzSwerveModule {
         wheelOffset = magEnc.get();
     }
 
-    private Rotation2d getCurrentRotation()
+    public Rotation2d getCurrentRotation()
     {
         return Rotation2d.fromDegrees((magEnc.get() - wheelOffset)*360);
     }
