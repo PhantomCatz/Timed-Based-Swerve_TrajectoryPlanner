@@ -11,8 +11,8 @@ public class CatzConstants {
     private static final double MODULE_DISTANCE_FROM_CENTER = 0.42672;
 
     private static final Translation2d SWERVE_LEFT_FRONT_LOCATION  = new Translation2d(MODULE_DISTANCE_FROM_CENTER, MODULE_DISTANCE_FROM_CENTER).div(Math.sqrt(2));
-    private static final Translation2d SWERVE_LEFT_BACK_LOCATION   = new Translation2d(MODULE_DISTANCE_FROM_CENTER, -MODULE_DISTANCE_FROM_CENTER).div(Math.sqrt(2));
-    private static final Translation2d SWERVE_RIGHT_FRONT_LOCATION = new Translation2d(-MODULE_DISTANCE_FROM_CENTER, MODULE_DISTANCE_FROM_CENTER).div(Math.sqrt(2));
+    private static final Translation2d SWERVE_LEFT_BACK_LOCATION   = new Translation2d(-MODULE_DISTANCE_FROM_CENTER, MODULE_DISTANCE_FROM_CENTER).div(Math.sqrt(2));
+    private static final Translation2d SWERVE_RIGHT_FRONT_LOCATION = new Translation2d(MODULE_DISTANCE_FROM_CENTER, -MODULE_DISTANCE_FROM_CENTER).div(Math.sqrt(2));
     private static final Translation2d SWERVE_RIGHT_BACK_LOCATION  = new Translation2d(-MODULE_DISTANCE_FROM_CENTER, -MODULE_DISTANCE_FROM_CENTER).div(Math.sqrt(2));
 
     // calculates the orientation and speed of individual swerve modules when given the motion of the whole robot
@@ -33,7 +33,7 @@ public class CatzConstants {
 
     //uses a trapezoidal velocity/time graph enforced with a PID loop
     private static ProfiledPIDController autoTurnPIDController
-            = new ProfiledPIDController(4, 0, 0, new TrapezoidProfile.Constraints(8, 8));
+            = new ProfiledPIDController(1, 0, 0, new TrapezoidProfile.Constraints(8, 8));
 
     static{
         autoTurnPIDController.enableContinuousInput(-Math.PI, Math.PI); //offset clamped between these two values

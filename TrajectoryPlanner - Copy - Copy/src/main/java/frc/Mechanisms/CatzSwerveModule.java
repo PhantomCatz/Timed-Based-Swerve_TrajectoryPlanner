@@ -79,6 +79,8 @@ public class CatzSwerveModule {
         double steerCommand = - steeringPID.calculate(getCurrentRotation().getDegrees(), desiredState.angle.getDegrees());
         steerCommand = Math.max(-1.0, Math.min(1.0, steerCommand));
         STEER_MOTOR.set(steerCommand);
+
+        // System.out.println(desiredState.angle.getDegrees() + " " + getCurrentRotation().getDegrees());
     }
 
     public void setPower(double power)
