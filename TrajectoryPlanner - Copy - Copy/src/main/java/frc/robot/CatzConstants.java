@@ -33,17 +33,17 @@ public class CatzConstants {
 
     //uses a trapezoidal velocity/time graph enforced with a PID loop
     private static ProfiledPIDController autoTurnPIDController
-            = new ProfiledPIDController(3, 0, 0, new TrapezoidProfile.Constraints(8, 8));
+            = new ProfiledPIDController(4, 0, 0, new TrapezoidProfile.Constraints(8, 8));
 
     static{
         autoTurnPIDController.enableContinuousInput(-Math.PI, Math.PI); //offset clamped between these two values
-        autoTurnPIDController.setTolerance(Math.toRadians(0.1)); //tolerable error
+        autoTurnPIDController.setTolerance(Math.toRadians(0.05)); //tolerable error
     }
 
     // calculates target chassis motion when given current position and desired trajectory
     public static final HolonomicDriveController holonomicDriveController = new HolonomicDriveController(
-        new PIDController(0.25, 0, 0), // PID values for x offset
-        new PIDController(0.25, 0, 0), // PID values for y offset
+        new PIDController(0.35, 0, 0), // PID values for x offset
+        new PIDController(0.35, 0, 0), // PID values for y offset
         autoTurnPIDController // PID values for orientation offset
     );
 }
