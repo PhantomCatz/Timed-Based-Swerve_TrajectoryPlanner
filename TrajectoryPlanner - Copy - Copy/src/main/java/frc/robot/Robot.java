@@ -69,7 +69,7 @@ public class Robot extends TimedRobot {
     // autonTimer.start();
 
     // AutonomousContainer.getInstance().runAutonomous(autoChooser.getSelected(), sideChooser.getSelected(), true);
-
+    drivetrain.resetGyro();
     robotTracker.resetPosition(new Pose2d());
     autonRoutineSelector.updateSelectedRoutine();
     autonExecutor.start();    

@@ -21,6 +21,8 @@ public class TrajectoryFollowingAction implements ActionBase{
 
     private final Trajectory trajectory;
     private final Rotation2d targetHeading;
+    private Rotation2d startingHeading;
+    private double totalTime;
 
     /**
      * @param trajectory The trajectory to follow
@@ -31,6 +33,8 @@ public class TrajectoryFollowingAction implements ActionBase{
         this.trajectory = trajectory;
         this.targetHeading = targetHeading; // this returns the desired orientation when given the current position (the function itself is given as an argument). But most of the times, it will just give a constant desired orientation.
         // also, why is it called refheading? wouldn't something like targetOrientation be better
+        this.startingHeading = Rotation2d.fromDegrees(0);
+        this.totalTime = trajectory.getTotalTimeSeconds();
 
         controller = CatzConstants.holonomicDriveController; // see catzconstants
     }
@@ -40,12 +44,13 @@ public class TrajectoryFollowingAction implements ActionBase{
     public void init() {
         timer.reset();
         timer.start();
+        startingHeading = Rotation2d.fromDegrees(driveTrain.getGyroAngle());
     }
 
     // calculates if trajectory is finished
     @Override
     public boolean isFinished() {
-        return timer.hasElapsed(trajectory.getTotalTimeSeconds() + EXTRA_TIME); //will only work if the code is configured correctly.
+        return timer.hasElapsed(totalTime + EXTRA_TIME); //will only work if the code is configured correctly.
     }
 
     // sets swerve modules to their target states so that the robot will follow the trajectory
@@ -55,7 +60,7 @@ public class TrajectoryFollowingAction implements ActionBase{
         double currentTime = timer.get();
         Trajectory.State goal = trajectory.sample(currentTime);
         
-        ChassisSpeeds adjustedSpeed = controller.calculate(robotTracker.getEstimatedPosition(), goal, targetHeading);
+        ChassisSpeeds adjustedSpeed = controller.calculate(robotTracker.getEstimatedPosition(), goal, targetHeading.interpolate(startingHeading, currentTime / totalTime));
         SwerveModuleState[] targetModuleStates = CatzConstants.swerveDriveKinematics.toSwerveModuleStates(adjustedSpeed);
         
         // System.out.println("goal: " + targetModuleStates[0].angle.getDegrees());

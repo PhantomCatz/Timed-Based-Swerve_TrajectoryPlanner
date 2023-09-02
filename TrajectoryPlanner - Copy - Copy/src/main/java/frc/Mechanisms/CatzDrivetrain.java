@@ -39,6 +39,11 @@ public class CatzDrivetrain {
 
     private AHRS navX;
 
+    public void resetGyro()
+    {
+        navX.reset();
+    }
+
     private CatzDrivetrain()
     {
         LT_FRNT_MODULE = new CatzSwerveModule(LT_FRNT_DRIVE_ID, LT_FRNT_STEER_ID, LT_FRNT_ENC_PORT, LT_FRNT_OFFSET);
@@ -52,7 +57,7 @@ public class CatzDrivetrain {
         swerveModules[3] = RT_BACK_MODULE;
 
         navX = new AHRS();
-        navX.reset();
+        resetGyro();
 
         resetMagEncs();
     }

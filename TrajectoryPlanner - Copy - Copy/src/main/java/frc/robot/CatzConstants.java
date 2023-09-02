@@ -33,7 +33,7 @@ public class CatzConstants {
 
     //uses a trapezoidal velocity/time graph enforced with a PID loop
     private static ProfiledPIDController autoTurnPIDController
-            = new ProfiledPIDController(1, 0, 0, new TrapezoidProfile.Constraints(8, 8));
+            = new ProfiledPIDController(5, 0, 0, new TrapezoidProfile.Constraints(8, 8));
 
     static{
         autoTurnPIDController.enableContinuousInput(-Math.PI, Math.PI); //offset clamped between these two values
