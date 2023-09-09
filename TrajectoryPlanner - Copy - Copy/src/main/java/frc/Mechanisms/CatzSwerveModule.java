@@ -75,7 +75,7 @@ public class CatzSwerveModule {
         DRIVE_MOTOR.set(ControlMode.Velocity, velocity);
 
         // double targetAngle = (Math.abs(desiredState.speedMetersPerSecond) <= (CatzConstants.MAX_SPEED * 0.01)) ? getCurrentRotation().getDegrees() : desiredState.angle.getDegrees(); //Prevent rotating module if speed is less then 1%. Prevents Jittering.
-        double steerCommand = - steeringPID.calculate(getCurrentRotation().getDegrees(), desiredState.angle.getDegrees() - CatzDrivetrain.navX.getAngle());
+        double steerCommand = - steeringPID.calculate(getCurrentRotation().getDegrees(), desiredState.angle.getDegrees() + CatzDrivetrain.navX.getAngle());
         steerCommand = Math.max(-1.0, Math.min(1.0, steerCommand));
         STEER_MOTOR.set(steerCommand);
     }

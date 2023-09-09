@@ -32,10 +32,10 @@ public class CatzDrivetrain {
     private final int RT_BACK_ENC_PORT = 7;
     private final int RT_FRNT_ENC_PORT = 8;
 
-    private double LT_FRNT_OFFSET = 0.0091; 
-    private double LT_BACK_OFFSET = 0.0466;
-    private double RT_BACK_OFFSET = 0.2567;
-    private double RT_FRNT_OFFSET = 0.0281;
+    private double LT_FRNT_OFFSET = 0.011; 
+    private double LT_BACK_OFFSET = 0.0485;
+    private double RT_BACK_OFFSET = 0.2593;
+    private double RT_FRNT_OFFSET = 0.0265;
 
     static AHRS navX;
 

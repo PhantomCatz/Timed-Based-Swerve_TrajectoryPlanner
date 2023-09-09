@@ -60,12 +60,13 @@ public class TrajectoryFollowingAction implements ActionBase{
         double currentTime = timer.get();
         Trajectory.State goal = trajectory.sample(currentTime);
         
-        ChassisSpeeds adjustedSpeed = controller.calculate(robotTracker.getEstimatedPosition(), goal, targetHeading.interpolate(startingHeading, currentTime / totalTime));
+        Rotation2d targetHeadingNow = targetHeading.interpolate(startingHeading, currentTime / totalTime);
+        ChassisSpeeds adjustedSpeed = controller.calculate(robotTracker.getEstimatedPosition(), goal, targetHeadingNow);
         SwerveModuleState[] targetModuleStates = CatzConstants.swerveDriveKinematics.toSwerveModuleStates(adjustedSpeed);
         
-        System.out.println("goal: " + goal.poseMeters);
+        System.out.println("goal: " + goal.poseMeters.getX() + " " + goal.poseMeters.getY() + targetHeadingNow.getDegrees());
+        System.out.println("adjusted speed: " + adjustedSpeed.vxMetersPerSecond + " " + adjustedSpeed.vyMetersPerSecond + " " + adjustedSpeed.omegaRadiansPerSecond);
         driveTrain.setSwerveModuleStates(targetModuleStates);
-
     }
 
     // stop all robot motion
