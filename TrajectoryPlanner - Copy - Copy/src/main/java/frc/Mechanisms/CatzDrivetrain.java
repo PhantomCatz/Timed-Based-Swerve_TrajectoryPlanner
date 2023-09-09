@@ -37,7 +37,7 @@ public class CatzDrivetrain {
     private double RT_BACK_OFFSET = 0.2567;
     private double RT_FRNT_OFFSET = 0.0281;
 
-    private AHRS navX;
+    static AHRS navX;
 
     public void resetGyro()
     {

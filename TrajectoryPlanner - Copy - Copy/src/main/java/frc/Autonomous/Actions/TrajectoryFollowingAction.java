@@ -63,7 +63,7 @@ public class TrajectoryFollowingAction implements ActionBase{
         ChassisSpeeds adjustedSpeed = controller.calculate(robotTracker.getEstimatedPosition(), goal, targetHeading.interpolate(startingHeading, currentTime / totalTime));
         SwerveModuleState[] targetModuleStates = CatzConstants.swerveDriveKinematics.toSwerveModuleStates(adjustedSpeed);
         
-        // System.out.println("goal: " + targetModuleStates[0].angle.getDegrees());
+        System.out.println("goal: " + goal.poseMeters);
         driveTrain.setSwerveModuleStates(targetModuleStates);
 
     }
