@@ -1,18 +1,26 @@
 package frc.Autonomous.Actions;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.controller.HolonomicDriveController;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.Timer;
-import frc.Autonomous.CatzRobotTracker;
-import frc.Mechanisms.CatzDrivetrain;
+import frc.DataLogger.CatzLog;
+import frc.DataLogger.DataCollection;
+import frc.Mechanisms.Odometry.CatzRobotTracker;
+import frc.Mechanisms.drivetrain.CatzDrivetrain;
 import frc.robot.CatzConstants;
+import frc.robot.Robot;
 
 // Follows a trajectory
 public class TrajectoryFollowingAction implements ActionBase{
-    private final double EXTRA_TIME = 0.0;
+    private final double TIMEOUT_RATIO = 1.5;
+    private final double END_POS_ERROR = 0.05;
+    private final double END_ROT_ERROR = Math.toRadians(5);
 
     private final Timer timer = new Timer();
     private final HolonomicDriveController controller;
@@ -21,8 +29,8 @@ public class TrajectoryFollowingAction implements ActionBase{
 
     private final Trajectory trajectory;
     private final Rotation2d targetHeading;
-    private Rotation2d startingHeading;
-    private double totalTime;
+
+    CatzLog data;
 
     /**
      * @param trajectory The trajectory to follow
@@ -33,10 +41,8 @@ public class TrajectoryFollowingAction implements ActionBase{
         this.trajectory = trajectory;
         this.targetHeading = targetHeading; // this returns the desired orientation when given the current position (the function itself is given as an argument). But most of the times, it will just give a constant desired orientation.
         // also, why is it called refheading? wouldn't something like targetOrientation be better
-        this.startingHeading = Rotation2d.fromDegrees(0);
-        this.totalTime = trajectory.getTotalTimeSeconds();
 
-        controller = CatzConstants.holonomicDriveController; // see catzconstants
+        controller = CatzConstants.DriveConstants.holonomicDriveController; // see catzconstants
     }
 
     // reset and start timer
@@ -44,13 +50,20 @@ public class TrajectoryFollowingAction implements ActionBase{
     public void init() {
         timer.reset();
         timer.start();
-        startingHeading = Rotation2d.fromDegrees(driveTrain.getGyroAngle());
     }
 
     // calculates if trajectory is finished
     @Override
     public boolean isFinished() {
-        return timer.hasElapsed(totalTime + EXTRA_TIME); //will only work if the code is configured correctly.
+        double maxTime = trajectory.getTotalTimeSeconds();
+        Pose2d dist = trajectory.sample(maxTime).poseMeters.relativeTo(robotTracker.getEstimatedPosition());
+
+        return 
+            timer.get() > maxTime * TIMEOUT_RATIO || 
+            (
+                dist.getRotation().getDegrees() <= END_ROT_ERROR &&
+                Math.sqrt(Math.pow(dist.getX(), 2) + Math.pow(dist.getY(), 2)) <= END_POS_ERROR
+            );
     }
 
     // sets swerve modules to their target states so that the robot will follow the trajectory
@@ -59,14 +72,37 @@ public class TrajectoryFollowingAction implements ActionBase{
     public void update() {
         double currentTime = timer.get();
         Trajectory.State goal = trajectory.sample(currentTime);
+        Pose2d currentPosition = robotTracker.getEstimatedPosition();
         
-        Rotation2d targetHeadingNow = targetHeading.interpolate(startingHeading, currentTime / totalTime);
-        ChassisSpeeds adjustedSpeed = controller.calculate(robotTracker.getEstimatedPosition(), goal, targetHeadingNow);
-        SwerveModuleState[] targetModuleStates = CatzConstants.swerveDriveKinematics.toSwerveModuleStates(adjustedSpeed);
-        
-        System.out.println("goal: " + goal.poseMeters.getX() + " " + goal.poseMeters.getY() + targetHeadingNow.getDegrees());
-        System.out.println("adjusted speed: " + adjustedSpeed.vxMetersPerSecond + " " + adjustedSpeed.vyMetersPerSecond + " " + adjustedSpeed.omegaRadiansPerSecond);
+        ChassisSpeeds adjustedSpeed = controller.calculate(currentPosition, goal, targetHeading);
+
+        SwerveModuleState[] targetModuleStates = CatzConstants.DriveConstants.swerveDriveKinematics.toSwerveModuleStates(adjustedSpeed);
+        for(int i = 0; i < 4; i++)
+        {
+            targetModuleStates[i] = SwerveModuleState.optimize(targetModuleStates[i], driveTrain.swerveModules[i].getCurrentRotation());
+        }
         driveTrain.setSwerveModuleStates(targetModuleStates);
+
+        if((DataCollection.chosenDataID.getSelected() == DataCollection.LOG_ID_TRAJECTORY)){
+            data = new CatzLog( 
+                currentTime, 
+                currentPosition.getX(), currentPosition.getY(), currentPosition.getRotation().getDegrees(),
+                goal.poseMeters.getX(), goal.poseMeters.getY(), goal.poseMeters.getRotation().getDegrees(),
+                adjustedSpeed.vxMetersPerSecond, adjustedSpeed.vyMetersPerSecond, adjustedSpeed.omegaRadiansPerSecond,
+                targetModuleStates[0].speedMetersPerSecond,
+                driveTrain.LT_FRNT_MODULE.getModuleState().speedMetersPerSecond,
+                targetModuleStates[0].angle.getDegrees(),
+                driveTrain.LT_FRNT_MODULE.getModuleState().angle.getDegrees(),
+                0.0, 0
+            );                 
+            Robot.dataCollection.logData.add(data);
+        }
+
+        /*Logger.getInstance().recordOutput("Current Position", robotTracker.getEstimatedPosition());
+        Logger.getInstance().recordOutput("Target Position", goal.poseMeters);
+        Logger.getInstance().recordOutput("Adjusted VelX", adjustedSpeed.vxMetersPerSecond);
+        Logger.getInstance().recordOutput("Adjusted VelX", adjustedSpeed.vyMetersPerSecond);
+        Logger.getInstance().recordOutput("Adjusted VelW", adjustedSpeed.omegaRadiansPerSecond);*/
     }
 
     // stop all robot motion
