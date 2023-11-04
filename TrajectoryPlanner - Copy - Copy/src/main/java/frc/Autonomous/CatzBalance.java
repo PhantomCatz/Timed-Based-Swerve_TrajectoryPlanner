@@ -1,7 +1,5 @@
 package frc.Autonomous;
 
-import javax.lang.model.util.ElementScanner14;
-
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.DataLogger.CatzLog;
@@ -75,7 +73,7 @@ public class CatzBalance
                     {
                         time = timer.get();
 
-                        balanceAngle = Robot.navX.getRoll(); 
+                        balanceAngle = Robot.drivetrain.getRoll(); 
 
                         if(prevTime < 0.0)
                         {

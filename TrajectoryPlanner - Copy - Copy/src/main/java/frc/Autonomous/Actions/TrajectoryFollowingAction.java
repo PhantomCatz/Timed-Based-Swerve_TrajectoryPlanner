@@ -29,6 +29,7 @@ public class TrajectoryFollowingAction implements ActionBase{
 
     private final Trajectory trajectory;
     private final Rotation2d targetHeading;
+    private Rotation2d initHeading;
 
     CatzLog data;
 
@@ -50,6 +51,7 @@ public class TrajectoryFollowingAction implements ActionBase{
     public void init() {
         timer.reset();
         timer.start();
+        initHeading = driveTrain.getRotation2d();
     }
 
     // calculates if trajectory is finished
@@ -74,13 +76,9 @@ public class TrajectoryFollowingAction implements ActionBase{
         Trajectory.State goal = trajectory.sample(currentTime);
         Pose2d currentPosition = robotTracker.getEstimatedPosition();
         
-        ChassisSpeeds adjustedSpeed = controller.calculate(currentPosition, goal, targetHeading);
-
+        ChassisSpeeds adjustedSpeed = controller.calculate(currentPosition, goal, initHeading.interpolate(targetHeading, currentTime / trajectory.getTotalTimeSeconds()));
+        adjustedSpeed.omegaRadiansPerSecond = - adjustedSpeed.omegaRadiansPerSecond;
         SwerveModuleState[] targetModuleStates = CatzConstants.DriveConstants.swerveDriveKinematics.toSwerveModuleStates(adjustedSpeed);
-        for(int i = 0; i < 4; i++)
-        {
-            targetModuleStates[i] = SwerveModuleState.optimize(targetModuleStates[i], driveTrain.swerveModules[i].getCurrentRotation());
-        }
         driveTrain.setSwerveModuleStates(targetModuleStates);
 
         if((DataCollection.chosenDataID.getSelected() == DataCollection.LOG_ID_TRAJECTORY)){

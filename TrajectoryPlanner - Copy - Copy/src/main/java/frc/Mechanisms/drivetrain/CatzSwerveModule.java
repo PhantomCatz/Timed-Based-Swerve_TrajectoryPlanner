@@ -37,7 +37,6 @@ public class CatzSwerveModule {
 
     public CatzSwerveModule(int driveMotorID, int steerMotorID, int encoderDIOChannel, double wheelOffset,  int index)
     {
-
         MagEncPWMInput = new DigitalInput(encoderDIOChannel);
         magEnc = new DutyCycleEncoder(MagEncPWMInput);
         
@@ -56,10 +55,8 @@ public class CatzSwerveModule {
 
         steeringPID = new PIDController(kP, kI, kD);
 
-
         this.wheelOffset = wheelOffset;
         //this.motorID = steerMotorID; //for smartdashboard
-
         this.index = index;
     }
 
@@ -108,6 +105,7 @@ public class CatzSwerveModule {
 
     public Rotation2d getCurrentRotation()
     {
+        // negative sign makes positive counterclockwise, which is correct
         return Rotation2d.fromDegrees((inputs.magEncoderValue - wheelOffset)*360);
     }
 

@@ -23,6 +23,8 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
  * <p>It is advised to statically import this class (or one of its inner classes) wherever the
  * constants are needed, to reduce verbosity.
  */
+
+@SuppressWarnings("unused")
 public final class CatzConstants {
   public static final Mode currentMode = Mode.REAL;
 
@@ -79,7 +81,7 @@ public final class CatzConstants {
 
     //uses a trapezoidal velocity/time graph enforced with a PID loop
     private static ProfiledPIDController autoTurnPIDController
-            = new ProfiledPIDController(2, 0, 0, new TrapezoidProfile.Constraints(MAX_ANGSPEED, MAX_ANGSPEED));
+            = new ProfiledPIDController(4, 0, 0, new TrapezoidProfile.Constraints(MAX_ANGSPEED, MAX_ANGSPEED));
 
     static{
         autoTurnPIDController.enableContinuousInput(-Math.PI, Math.PI); //offset clamped between these two values
@@ -88,8 +90,8 @@ public final class CatzConstants {
 
     // calculates target chassis motion when given current position and desired trajectory
     public static final HolonomicDriveController holonomicDriveController = new HolonomicDriveController(
-        new PIDController(0.15, 0, 0), // PID values for x offset
-        new PIDController(0.15, 0, 0), // PID values for y offset
+        new PIDController(0.35, 0, 0), // PID values for x offset
+        new PIDController(0.35, 0, 0), // PID values for y offset
         autoTurnPIDController // PID values for orientation offset
     );
  }

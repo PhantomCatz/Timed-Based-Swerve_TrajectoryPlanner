@@ -33,7 +33,7 @@ public class CatzDrivetrain {
 
     private final int LT_FRNT_DRIVE_ID = 1;
     private final int LT_BACK_DRIVE_ID = 3;
-    private final int RT_BACK_DRIVE_ID = 5;
+    private final int RT_BACK_DRIVE_ID = 22;
     private final int RT_FRNT_DRIVE_ID = 7;
     
     private final int LT_FRNT_STEER_ID = 2;
@@ -51,10 +51,15 @@ public class CatzDrivetrain {
     private double RT_BACK_OFFSET = 0.2567;
     private double RT_FRNT_OFFSET = 0.0281;*/
 
-    private double LT_FRNT_OFFSET = -0.2759; 
+    /*private double LT_FRNT_OFFSET = -0.2759; 
     private double LT_BACK_OFFSET = -0.1707;
     private double RT_BACK_OFFSET = 0.4169;
-    private double RT_FRNT_OFFSET = 0.1975;
+    private double RT_FRNT_OFFSET = 0.1975;*/
+
+    private final double LT_FRNT_OFFSET =  0.0100; //0.073 //-0.0013; //MC ID 2
+    private final double LT_BACK_OFFSET =  0.0439; //0.0431 //0.0498; //MC ID 4
+    private final double RT_BACK_OFFSET =  0.2588; //0.2420 //0.2533; //MC ID 6
+    private final double RT_FRNT_OFFSET =  0.0280; //0.0238 //0.0222; //MC ID 8
 
     private ChassisSpeeds chassisSpeeds;
 
@@ -155,7 +160,6 @@ public class CatzDrivetrain {
 
      
         SwerveModuleState[] moduleStates = CatzConstants.DriveConstants.swerveDriveKinematics.toSwerveModuleStates(chassisSpeeds);
-        SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, CatzConstants.DriveConstants.MAX_SPEED);
         setSwerveModuleStates(moduleStates);
         
 
@@ -165,8 +169,9 @@ public class CatzDrivetrain {
 
     public void setSwerveModuleStates(SwerveModuleState[] states)
     {
+        SwerveDriveKinematics.desaturateWheelSpeeds(states, CatzConstants.DriveConstants.MAX_SPEED);
         for(int i = 0; i < states.length; i++){
-            // states[i] = SwerveModuleState.optimize(states[i], swerveModules[i].getCurrentRotation());
+            states[i] = SwerveModuleState.optimize(states[i], swerveModules[i].getCurrentRotation());
             swerveModules[i].setDesiredState(states[i]);
         }
     }
@@ -209,7 +214,12 @@ public class CatzDrivetrain {
 
     public double getGyroAngle()
     {
-        return -gyroInputs.gyroAngle;
+        // negative sign makes positive counterclockwise, which is correct
+        return - gyroInputs.gyroAngle;
+    }
+
+    public double getRoll(){
+        return gyroInputs.gyroRoll;
     }
 
     public void stopDriving(){
@@ -267,7 +277,11 @@ public class CatzDrivetrain {
 
     public void smartDashboardDriveTrain()
     {
-        SmartDashboard.putNumber("Gyro", gyroInputs.gyroAngle);
+        SmartDashboard.putNumber("Gyro", getGyroAngle());
+        SmartDashboard.putNumber("LF Angle", LT_FRNT_MODULE.getCurrentRotation().getDegrees());
+        SmartDashboard.putNumber("LB Angle", LT_BACK_MODULE.getCurrentRotation().getDegrees());
+        SmartDashboard.putNumber("RF Angle", RT_FRNT_MODULE.getCurrentRotation().getDegrees());
+        SmartDashboard.putNumber("RB Angle", RT_BACK_MODULE.getCurrentRotation().getDegrees());
     }
 
     public static CatzDrivetrain getInstance()
