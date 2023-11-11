@@ -10,7 +10,7 @@ import frc.Mechanisms.AbstractMechanism;
 import frc.Mechanisms.drivetrain.CatzDrivetrain;
 import frc.robot.CatzConstants;
 
-public class CatzRobotTracker extends AbstractMechanism{
+public class CatzRobotTracker {
     // combines SwerveDrivePoseEstimator with april tags to get robot position
 
     private static CatzRobotTracker instance = null;
@@ -24,18 +24,20 @@ public class CatzRobotTracker extends AbstractMechanism{
 
     private CatzRobotTracker()
     {
-        super(THREAD_PERIOD_MS);
-        System.out.println("Yes");
         driveTrain.resetDriveEncs();
-        poseEstimator = new SwerveDrivePoseEstimator(CatzConstants.DriveConstants.swerveDriveKinematics, Rotation2d.fromDegrees(0.0), driveTrain.getModulePositions(), new Pose2d(0,0,Rotation2d.fromDegrees(0.0)));
-        super.start();
+        poseEstimator = new SwerveDrivePoseEstimator(
+            CatzConstants.DriveConstants.swerveDriveKinematics, 
+            CatzConstants.initPose.getRotation(), 
+            driveTrain.getModulePositions(), 
+            CatzConstants.initPose
+        );
     }
 
     //METHOD USED IN AUTONOMOUS CONTAINER
     public void resetPosition(Pose2d pose)
     {
         driveTrain.resetDriveEncs();
-        poseEstimator.resetPosition(Rotation2d.fromDegrees(driveTrain.getGyroAngle()), driveTrain.getModulePositions(), pose);
+        poseEstimator.resetPosition(CatzConstants.initPose.getRotation(), driveTrain.getModulePositions(), pose);
     }
     //METHOD USED IN AUTONOMOUS CONTAINER
 
@@ -44,7 +46,6 @@ public class CatzRobotTracker extends AbstractMechanism{
     {
         if(instance == null) 
         {
-            System.out.println("Yes");
             instance = new CatzRobotTracker();
         }
         return instance;
@@ -59,7 +60,6 @@ public class CatzRobotTracker extends AbstractMechanism{
     }
 
     // updates poseEstimator with new measurements
-    @Override
     public void update() 
     {
         if(limelight.aprilTagInView())
@@ -71,13 +71,11 @@ public class CatzRobotTracker extends AbstractMechanism{
         Logger.getInstance().recordOutput("pose", poseEstimator.getEstimatedPosition());
     }
 
-    @Override
     public void smartDashboard() {
         // TODO Auto-generated method stub
         
     }
 
-    @Override
     public void smartDashboard_DEBUG() {
         // TODO Auto-generated method stub
         

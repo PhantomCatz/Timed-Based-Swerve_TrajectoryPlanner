@@ -12,6 +12,8 @@ package frc.robot;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -27,6 +29,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 @SuppressWarnings("unused")
 public final class CatzConstants {
   public static final Mode currentMode = Mode.REAL;
+  public static final Pose2d initPose = new Pose2d(0, 0, Rotation2d.fromDegrees(180));
 
   public static enum Mode {
     /** Running on a real robot. */
@@ -42,13 +45,6 @@ public final class CatzConstants {
   public static enum AllianceColor {
     BlUE_ALLIANCE,
     RED_ALLIANCE
-  }
-  //------------------------Autonomous path Enums--------------------
-
-  public static enum AutonomousPath 
-  {
-    TEST
-
   }
 
  //Saving for finished trajectory planner
@@ -66,8 +62,8 @@ public final class CatzConstants {
     public static final SwerveDriveKinematics swerveDriveKinematics = new SwerveDriveKinematics(
         SWERVE_LEFT_FRONT_LOCATION,
         SWERVE_LEFT_BACK_LOCATION,
-        SWERVE_RIGHT_FRONT_LOCATION,
-        SWERVE_RIGHT_BACK_LOCATION
+        SWERVE_RIGHT_BACK_LOCATION,
+        SWERVE_RIGHT_FRONT_LOCATION
     );
 
     public static final double MAX_SPEED = 3.0; // meters per second
@@ -90,8 +86,8 @@ public final class CatzConstants {
 
     // calculates target chassis motion when given current position and desired trajectory
     public static final HolonomicDriveController holonomicDriveController = new HolonomicDriveController(
-        new PIDController(0.35, 0, 0), // PID values for x offset
-        new PIDController(0.35, 0, 0), // PID values for y offset
+        new PIDController(5, 0, 0), // PID values for x offset
+        new PIDController(5, 0, 0), // PID values for y offset
         autoTurnPIDController // PID values for orientation offset
     );
  }

@@ -1,3 +1,4 @@
+
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
@@ -322,6 +323,7 @@ public class Robot extends LoggedRobot
 
     //intake.smartdashboardIntakeDebug();      
     drivetrain.updateSensorValues();
+    robotTracker.update();
   }
 
 
@@ -344,7 +346,7 @@ public class Robot extends LoggedRobot
   @Override
   public void autonomousInit() 
   {
-    robotTracker.resetPosition(new Pose2d(0.0,0.0,Rotation2d.fromDegrees(0.0)));
+    robotTracker.resetPosition(CatzConstants.initPose);
     drivetrain.zeroGyro();
     Timer.delay(50 / 1000.0);
     autonRoutineSelector.updateSelectedRoutine();

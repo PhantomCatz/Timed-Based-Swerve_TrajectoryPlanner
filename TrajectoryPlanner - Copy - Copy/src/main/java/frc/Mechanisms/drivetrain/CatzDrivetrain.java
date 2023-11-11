@@ -5,7 +5,9 @@ import org.littletonrobotics.junction.Logger;
 
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -13,6 +15,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.Mechanisms.Odometry.CatzAprilTag;
 import frc.Mechanisms.Odometry.CatzRobotTracker;
+import frc.Utils.GeometryUtils;
 import frc.robot.CatzConstants;
 import frc.robot.Robot;
 import frc.robot.Robot.gameModeLED;
@@ -56,10 +59,10 @@ public class CatzDrivetrain {
     private double RT_BACK_OFFSET = 0.4169;
     private double RT_FRNT_OFFSET = 0.1975;*/
 
-    private final double LT_FRNT_OFFSET =  0.0100; //0.073 //-0.0013; //MC ID 2
-    private final double LT_BACK_OFFSET =  0.0439; //0.0431 //0.0498; //MC ID 4
-    private final double RT_BACK_OFFSET =  0.2588; //0.2420 //0.2533; //MC ID 6
-    private final double RT_FRNT_OFFSET =  0.0280; //0.0238 //0.0222; //MC ID 8
+    private final double LT_FRNT_OFFSET = 0.007371500184287522;
+    private final double LT_BACK_OFFSET = 0.04736465118411634;
+    private final double RT_BACK_OFFSET = 0.2542108938552728;
+    private final double RT_FRNT_OFFSET = 0.0351528633788208;
 
     private ChassisSpeeds chassisSpeeds;
 
@@ -82,8 +85,8 @@ public class CatzDrivetrain {
 
         swerveModules[0] = LT_FRNT_MODULE;
         swerveModules[1] = LT_BACK_MODULE;
-        swerveModules[2] = RT_FRNT_MODULE;
-        swerveModules[3] = RT_BACK_MODULE;
+        swerveModules[2] = RT_BACK_MODULE;
+        swerveModules[3] = RT_FRNT_MODULE;
 
         resetMagEncs();
     }
@@ -171,9 +174,32 @@ public class CatzDrivetrain {
     {
         SwerveDriveKinematics.desaturateWheelSpeeds(states, CatzConstants.DriveConstants.MAX_SPEED);
         for(int i = 0; i < states.length; i++){
-            states[i] = SwerveModuleState.optimize(states[i], swerveModules[i].getCurrentRotation());
             swerveModules[i].setDesiredState(states[i]);
         }
+    }
+
+
+        /**
+     * Correction for swerve second order dynamics issue. Borrowed from 254:
+     * https://github.com/Team254/FRC-2022-Public/blob/main/src/main/java/com/team254/frc2022/subsystems/Drive.java#L325
+     * Discussion:
+     * https://www.chiefdelphi.com/t/whitepaper-swerve-drive-skew-and-second-order-kinematics/416964
+     */
+    private static ChassisSpeeds correctForDynamics(ChassisSpeeds originalSpeeds) 
+    {
+        final double LOOP_TIME_S = 0.02;
+        Pose2d futureRobotPose =
+            new Pose2d(
+                originalSpeeds.vxMetersPerSecond * LOOP_TIME_S,
+                originalSpeeds.vyMetersPerSecond * LOOP_TIME_S,
+                Rotation2d.fromRadians(originalSpeeds.omegaRadiansPerSecond * LOOP_TIME_S));
+        Twist2d twistForPose = GeometryUtils.log(futureRobotPose);
+        ChassisSpeeds updatedSpeeds =
+            new ChassisSpeeds(
+                twistForPose.dx / LOOP_TIME_S,
+                twistForPose.dy / LOOP_TIME_S,
+                twistForPose.dtheta / LOOP_TIME_S);
+        return updatedSpeeds;
     }
 
     public Rotation2d getRotation2d()
@@ -202,20 +228,10 @@ public class CatzDrivetrain {
         }
     }
 
-    public void initializeOffsets()
-    {
-        //GyroIO.setAngleAdjustmentIO(-gyroInputs.gyroYaw);
-
-        for(CatzSwerveModule module : swerveModules)
-        {
-            module.initializeOffset();
-        }
-    }
-
     public double getGyroAngle()
     {
         // negative sign makes positive counterclockwise, which is correct
-        return - gyroInputs.gyroAngle;
+        return -gyroInputs.gyroAngle;
     }
 
     public double getRoll(){
