@@ -130,7 +130,6 @@ public class Robot extends LoggedRobot
   //---------------------------------------------------------------------------------------------
   //  Autonomous
   //---------------------------------------------------------------------------------------------
-  public static CatzBalance         balance;
 
   private final double OFFSET_DELAY = 0.5;    //TBD put into AUTO BALANCE class
 
@@ -273,7 +272,6 @@ public class Robot extends LoggedRobot
     //----------------------------------------------------------------------------------------------
     //  Autonomous
     //----------------------------------------------------------------------------------------------
-    balance = new CatzBalance();
 
     //----------------------------------------------------------------------------------------------
     //  Mechanisms
@@ -317,7 +315,6 @@ public class Robot extends LoggedRobot
 
         
     arm.smartDashboardARM();
-    balance.SmartDashboardBalance();
   
     //debug should be commented out for comp
 
@@ -386,7 +383,6 @@ public class Robot extends LoggedRobot
     currentTime.start();
 
     dataCollection.startDataCollection();
-    balance.StopBalancing();
 
     currentGameModeLED = gameModeLED.TeleOp;
   }

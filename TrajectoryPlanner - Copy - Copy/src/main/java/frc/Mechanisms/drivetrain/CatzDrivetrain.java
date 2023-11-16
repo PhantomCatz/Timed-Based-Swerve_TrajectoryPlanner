@@ -3,22 +3,14 @@ package frc.Mechanisms.drivetrain;
 
 import org.littletonrobotics.junction.Logger;
 
-import com.kauailabs.navx.frc.AHRS;
-
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.Mechanisms.Odometry.CatzAprilTag;
-import frc.Mechanisms.Odometry.CatzRobotTracker;
-import frc.Utils.GeometryUtils;
 import frc.robot.CatzConstants;
-import frc.robot.Robot;
-import frc.robot.Robot.gameModeLED;
 
 public class CatzDrivetrain {
     private static CatzDrivetrain instance = null;
@@ -185,22 +177,22 @@ public class CatzDrivetrain {
      * Discussion:
      * https://www.chiefdelphi.com/t/whitepaper-swerve-drive-skew-and-second-order-kinematics/416964
      */
-    private static ChassisSpeeds correctForDynamics(ChassisSpeeds originalSpeeds) 
-    {
-        final double LOOP_TIME_S = 0.02;
-        Pose2d futureRobotPose =
-            new Pose2d(
-                originalSpeeds.vxMetersPerSecond * LOOP_TIME_S,
-                originalSpeeds.vyMetersPerSecond * LOOP_TIME_S,
-                Rotation2d.fromRadians(originalSpeeds.omegaRadiansPerSecond * LOOP_TIME_S));
-        Twist2d twistForPose = GeometryUtils.log(futureRobotPose);
-        ChassisSpeeds updatedSpeeds =
-            new ChassisSpeeds(
-                twistForPose.dx / LOOP_TIME_S,
-                twistForPose.dy / LOOP_TIME_S,
-                twistForPose.dtheta / LOOP_TIME_S);
-        return updatedSpeeds;
-    }
+    // private static ChassisSpeeds correctForDynamics(ChassisSpeeds originalSpeeds) 
+    // {
+    //     final double LOOP_TIME_S = 0.02;
+    //     Pose2d futureRobotPose =
+    //         new Pose2d(
+    //             originalSpeeds.vxMetersPerSecond * LOOP_TIME_S,
+    //             originalSpeeds.vyMetersPerSecond * LOOP_TIME_S,
+    //             Rotation2d.fromRadians(originalSpeeds.omegaRadiansPerSecond * LOOP_TIME_S));
+    //     Twist2d twistForPose = GeometryUtils.log(futureRobotPose);
+    //     ChassisSpeeds updatedSpeeds =
+    //         new ChassisSpeeds(
+    //             twistForPose.dx / LOOP_TIME_S,
+    //             twistForPose.dy / LOOP_TIME_S,
+    //             twistForPose.dtheta / LOOP_TIME_S);
+    //     return updatedSpeeds;
+    // }
 
     public Rotation2d getRotation2d()
     {
