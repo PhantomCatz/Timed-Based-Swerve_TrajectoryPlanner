@@ -17,11 +17,8 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Timer;
-import frc.Autonomous.CatzAutonomousPaths;
 import frc.DataLogger.CatzLog;
 import frc.DataLogger.DataCollection;
-
-
 
 public class CatzElevator
 {

@@ -123,7 +123,7 @@ public class CatzRGB
     };
 
     public ColorMethod oneColorFillAllianceColor = (color) -> {
-        fillLEDBuffer(enumToAllianceColor(Robot.paths.chosenAllianceColor.getSelected()));
+        //fillLEDBuffer(enumToAllianceColor(Robot.paths.chosenAllianceColor.getSelected()));
     };
 
     public ColorMethod startFlowingRainbow = (color) -> {

@@ -1,7 +1,5 @@
 package frc.Autonomous.Actions;
 
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -20,7 +18,7 @@ import frc.robot.Robot;
 public class TrajectoryFollowingAction implements ActionBase{
     private final double TIMEOUT_RATIO = 1.5;
     private final double END_POS_ERROR = 0.05;
-    private final double END_ROT_ERROR = Math.toRadians(5);
+    private final double END_ROT_ERROR = 5;
 
     private final Timer timer = new Timer();
     private final HolonomicDriveController controller;
@@ -29,6 +27,7 @@ public class TrajectoryFollowingAction implements ActionBase{
 
     private final Trajectory trajectory;
     private final Rotation2d targetHeading;
+    private Rotation2d initHeading;
 
     CatzLog data;
 
@@ -50,19 +49,21 @@ public class TrajectoryFollowingAction implements ActionBase{
     public void init() {
         timer.reset();
         timer.start();
+        initHeading = driveTrain.getRotation2d();
     }
 
     // calculates if trajectory is finished
     @Override
     public boolean isFinished() {
         double maxTime = trajectory.getTotalTimeSeconds();
-        Pose2d dist = trajectory.sample(maxTime).poseMeters.relativeTo(robotTracker.getEstimatedPosition());
+        Pose2d currentPosition = robotTracker.getEstimatedPosition();
+        Pose2d dist = trajectory.sample(maxTime).poseMeters.relativeTo(currentPosition);
 
         return 
             timer.get() > maxTime * TIMEOUT_RATIO || 
             (
-                dist.getRotation().getDegrees() <= END_ROT_ERROR &&
-                Math.sqrt(Math.pow(dist.getX(), 2) + Math.pow(dist.getY(), 2)) <= END_POS_ERROR
+                Math.abs(targetHeading.getDegrees() - currentPosition.getRotation().getDegrees()) <= END_ROT_ERROR &&
+                Math.hypot(dist.getX(), dist.getY()) <= END_POS_ERROR
             );
     }
 
@@ -73,21 +74,18 @@ public class TrajectoryFollowingAction implements ActionBase{
         double currentTime = timer.get();
         Trajectory.State goal = trajectory.sample(currentTime);
         Pose2d currentPosition = robotTracker.getEstimatedPosition();
+        Rotation2d targetHeadingNow = initHeading.interpolate(targetHeading, currentTime / trajectory.getTotalTimeSeconds());
         
-        ChassisSpeeds adjustedSpeed = controller.calculate(currentPosition, goal, targetHeading);
-
+        ChassisSpeeds adjustedSpeed = controller.calculate(currentPosition, goal, targetHeadingNow);
+        //adjustedSpeed = correctForDynamics(adjustedSpeed);
         SwerveModuleState[] targetModuleStates = CatzConstants.DriveConstants.swerveDriveKinematics.toSwerveModuleStates(adjustedSpeed);
-        for(int i = 0; i < 4; i++)
-        {
-            targetModuleStates[i] = SwerveModuleState.optimize(targetModuleStates[i], driveTrain.swerveModules[i].getCurrentRotation());
-        }
         driveTrain.setSwerveModuleStates(targetModuleStates);
 
         if((DataCollection.chosenDataID.getSelected() == DataCollection.LOG_ID_TRAJECTORY)){
             data = new CatzLog( 
                 currentTime, 
                 currentPosition.getX(), currentPosition.getY(), currentPosition.getRotation().getDegrees(),
-                goal.poseMeters.getX(), goal.poseMeters.getY(), goal.poseMeters.getRotation().getDegrees(),
+                goal.poseMeters.getX(), goal.poseMeters.getY(), targetHeadingNow.getDegrees(),
                 adjustedSpeed.vxMetersPerSecond, adjustedSpeed.vyMetersPerSecond, adjustedSpeed.omegaRadiansPerSecond,
                 targetModuleStates[0].speedMetersPerSecond,
                 driveTrain.LT_FRNT_MODULE.getModuleState().speedMetersPerSecond,
@@ -114,4 +112,27 @@ public class TrajectoryFollowingAction implements ActionBase{
         
         System.out.println("trajectory done");
     }
+
+            /**
+     * Correction for swerve second order dynamics issue. Borrowed from 254:
+     * https://github.com/Team254/FRC-2022-Public/blob/main/src/main/java/com/team254/frc2022/subsystems/Drive.java#L325
+     * Discussion:
+     * https://www.chiefdelphi.com/t/whitepaper-swerve-drive-skew-and-second-order-kinematics/416964
+     */
+    // private static ChassisSpeeds correctForDynamics(ChassisSpeeds originalSpeeds) 
+    // {
+    //     final double LOOP_TIME_S = 0.02;
+    //     Pose2d futureRobotPose =
+    //         new Pose2d(
+    //             originalSpeeds.vxMetersPerSecond * LOOP_TIME_S,
+    //             originalSpeeds.vyMetersPerSecond * LOOP_TIME_S,
+    //             Rotation2d.fromRadians(originalSpeeds.omegaRadiansPerSecond * LOOP_TIME_S));
+    //     Twist2d twistForPose = GeometryUtils.log(futureRobotPose);
+    //     ChassisSpeeds updatedSpeeds =
+    //         new ChassisSpeeds(
+    //             twistForPose.dx / LOOP_TIME_S,
+    //             twistForPose.dy / LOOP_TIME_S,
+    //             twistForPose.dtheta / LOOP_TIME_S);
+    //     return updatedSpeeds;
+    // }
 }

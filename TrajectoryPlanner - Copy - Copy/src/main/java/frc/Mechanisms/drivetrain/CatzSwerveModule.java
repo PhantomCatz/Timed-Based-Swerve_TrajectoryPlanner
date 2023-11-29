@@ -2,27 +2,19 @@ package frc.Mechanisms.drivetrain;
 
 import org.littletonrobotics.junction.Logger;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMax.IdleMode;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import frc.Utils.CatzMathUtils;
 import frc.Utils.Conversions;
 import frc.robot.CatzConstants;
 
 public class CatzSwerveModule {
     private final ModuleIO io;
-    private final ModuleIOInputsAutoLogged   inputs = new ModuleIOInputsAutoLogged();
+    private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
 
     private final PIDController steeringPID;
     private final double kP = 0.005;
@@ -37,7 +29,6 @@ public class CatzSwerveModule {
 
     public CatzSwerveModule(int driveMotorID, int steerMotorID, int encoderDIOChannel, double wheelOffset,  int index)
     {
-
         MagEncPWMInput = new DigitalInput(encoderDIOChannel);
         magEnc = new DutyCycleEncoder(MagEncPWMInput);
         
@@ -56,10 +47,8 @@ public class CatzSwerveModule {
 
         steeringPID = new PIDController(kP, kI, kD);
 
-
         this.wheelOffset = wheelOffset;
         //this.motorID = steerMotorID; //for smartdashboard
-
         this.index = index;
     }
 
@@ -71,8 +60,10 @@ public class CatzSwerveModule {
 
     public void setDesiredState(SwerveModuleState desiredState) //basically a function made solely for the purpose of following a trajectory. could be used for teleop though.
     {
+        desiredState = CatzMathUtils.optimize(desiredState, getCurrentRotation());
         double velocity = Conversions.MPSToFalcon(desiredState.speedMetersPerSecond, CatzConstants.DriveConstants.DRVTRAIN_WHEEL_CIRCUMFERENCE, CatzConstants.DriveConstants.SDS_L2_GEAR_RATIO);
         io.setDrivePwrVelocityIO(velocity);
+
 
         //double targetAngle = (Math.abs(desiredState.speedMetersPerSecond) <= (CatzConstants.DriveConstants.MAX_SPEED * 0.01)) ? getCurrentRotation().getDegrees() : desiredState.angle.getDegrees(); //Prevent rotating module if speed is less then 1%. Prevents Jittering.
 
@@ -108,6 +99,7 @@ public class CatzSwerveModule {
 
     public Rotation2d getCurrentRotation()
     {
+        // negative sign makes positive counterclockwise, which is correct
         return Rotation2d.fromDegrees((inputs.magEncoderValue - wheelOffset)*360);
     }
 

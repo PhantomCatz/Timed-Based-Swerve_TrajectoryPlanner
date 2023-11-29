@@ -1,3 +1,4 @@
+
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
@@ -5,18 +6,14 @@
 package frc.robot;
 
 import java.util.ArrayList;
-import java.util.function.Supplier;
-
-import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.cscore.HttpCamera.HttpCameraKind;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.PowerDistribution;
 
 import frc.DataLogger.CatzLog;
@@ -30,8 +27,6 @@ import frc.Mechanisms.elevator.CatzElevator;
 import frc.Mechanisms.intake.CatzIntake;
 import frc.Autonomous.*;
 
-import edu.wpi.first.wpilibj.DataLogManager;
-import edu.wpi.first.wpilibj.DriverStation;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.Logger;
@@ -51,9 +46,6 @@ public class Robot extends LoggedRobot
   //---------------------------------------------------------------------------------------------
   //  Autonomous trajectory
   //---------------------------------------------------------------------------------------------
-  private final SendableChooser<String> autoChooser = new SendableChooser<>();
-  private final SendableChooser<String> sideChooser = new SendableChooser<>();
-
   public static final CatzDrivetrain drivetrain = CatzDrivetrain.getInstance();
   private final CatzRobotTracker robotTracker = CatzRobotTracker.getInstance();
 
@@ -74,8 +66,6 @@ public class Robot extends LoggedRobot
   //  Shared Robot Components (e.g. not mechanism specific, such as PDH, NavX, etc)
   //----------------------------------------------------------------------------------------------
   public static PowerDistribution PDH;
-
-  public static AHRS              navX;
 
   public static Timer             currentTime;
 
@@ -140,9 +130,6 @@ public class Robot extends LoggedRobot
   //---------------------------------------------------------------------------------------------
   //  Autonomous
   //---------------------------------------------------------------------------------------------
-  public static CatzAutonomous      auton;
-  public static CatzAutonomousPaths paths = new CatzAutonomousPaths();
-  public static CatzBalance         balance;
 
   private final double OFFSET_DELAY = 0.5;    //TBD put into AUTO BALANCE class
 
@@ -277,9 +264,6 @@ public class Robot extends LoggedRobot
     //-----------------------------------------------------------------------------------------
     PDH = new PowerDistribution();
 
-    navX = new AHRS();
-    navX.reset();
-
     xboxDrv = new XboxController(XBOX_DRV_PORT);
     xboxAux = new XboxController(XBOX_AUX_PORT);
 
@@ -288,8 +272,6 @@ public class Robot extends LoggedRobot
     //----------------------------------------------------------------------------------------------
     //  Autonomous
     //----------------------------------------------------------------------------------------------
-    auton   = new CatzAutonomous();
-    balance = new CatzBalance();
 
     //----------------------------------------------------------------------------------------------
     //  Mechanisms
@@ -321,7 +303,6 @@ public class Robot extends LoggedRobot
     //----------------------------------------------------------------------------------------------
     //  Shuffleboard Data Display
     //----------------------------------------------------------------------------------------------
-    SmartDashboard.putNumber("NavX", navX.getAngle());
     SmartDashboard.putNumber("gamepiece int", selectedGamePiece);
     SmartDashboard.putNumber("COMMAND STATE", commandedStateUpdate);
 
@@ -334,12 +315,12 @@ public class Robot extends LoggedRobot
 
         
     arm.smartDashboardARM();
-    balance.SmartDashboardBalance();
   
     //debug should be commented out for comp
 
     //intake.smartdashboardIntakeDebug();      
     drivetrain.updateSensorValues();
+    robotTracker.update();
   }
 
 
@@ -362,7 +343,7 @@ public class Robot extends LoggedRobot
   @Override
   public void autonomousInit() 
   {
-    robotTracker.resetPosition(new Pose2d(0.0,0.0,Rotation2d.fromDegrees(180.0)));
+    robotTracker.resetPosition(CatzConstants.initPose);
     drivetrain.zeroGyro();
     Timer.delay(50 / 1000.0);
     autonRoutineSelector.updateSelectedRoutine();
@@ -379,10 +360,12 @@ public class Robot extends LoggedRobot
   @Override
   public void autonomousPeriodic()
   {
-
+    // for testing coordinate system of mag encoder
+    // drivetrain.LT_BACK_MODULE.setDesiredState(new SwerveModuleState(0.5, Rotation2d.fromDegrees(90)));
+    // drivetrain.RT_BACK_MODULE.setDesiredState(new SwerveModuleState(0.5, Rotation2d.fromDegrees(90)));
+    // drivetrain.LT_FRNT_MODULE.setDesiredState(new SwerveModuleState(0.5, Rotation2d.fromDegrees(90)));
+    // drivetrain.RT_FRNT_MODULE.setDesiredState(new SwerveModuleState(0.5, Rotation2d.fromDegrees(90)));
   }
-
-
 
   /*-----------------------------------------------------------------------------------------
   *  
@@ -400,7 +383,6 @@ public class Robot extends LoggedRobot
     currentTime.start();
 
     dataCollection.startDataCollection();
-    balance.StopBalancing();
 
     currentGameModeLED = gameModeLED.TeleOp;
   }
@@ -414,9 +396,8 @@ public class Robot extends LoggedRobot
 
     if(xboxDrv.getStartButtonPressed())
     {
-      zeroGyro();
+      drivetrain.zeroGyro();
     }
-
 
     xboxHighNode           = xboxAux.getYButton();
     xboxMidNode            = xboxAux.getBButton();
@@ -427,12 +408,6 @@ public class Robot extends LoggedRobot
     xboxElevatorManualMode = xboxAux.getRightStickButton();
     xboxElevatorManualPwr  = xboxAux.getRightY();
 
-
-
-    
-
-
- 
     xboxGamePieceSelection(xboxAux.getPOV(),                // Left = Cone, Right = Cube
                            xboxAux.getBackButtonPressed()); // Clear Selected Game Piece
 
@@ -501,9 +476,6 @@ public class Robot extends LoggedRobot
     autonTimer.stop();
     autonExecutor.stop();
     AutonActionExecutor.resetInstance();
-
-    
-    System.out.println( "intake temp " + intake.intakeWristTemp());
  
     currentGameModeLED = gameModeLED.MatchEnd;
 
@@ -645,13 +617,6 @@ public class Robot extends LoggedRobot
       }
     }
   }   //end of determineCommandState()
-
-
-
-  public void zeroGyro()
-  {
-    navX.setAngleAdjustment(-navX.getYaw());
-  }
 
   public void xboxGamePieceSelection(double Dpad, boolean SelectButtonPressed)
   {

@@ -56,8 +56,8 @@ public class ModuleIOReal implements ModuleIO
     @Override
     public void updateInputs(ModuleIOInputs inputs)
     {
-        inputs.driveMtrSelectedSensorVelocity = DRIVE_MOTOR.getSelectedSensorVelocity();
-        inputs.driveMtrSelectedSensorPosition = DRIVE_MOTOR.getSelectedSensorPosition();
+        inputs.driveMtrSelectedSensorVelocity = - DRIVE_MOTOR.getSelectedSensorVelocity();
+        inputs.driveMtrSelectedSensorPosition = - DRIVE_MOTOR.getSelectedSensorPosition();
         inputs.magEncoderValue = magEnc.get();
         inputs.driveMtrOutputPercent = DRIVE_MOTOR.getMotorOutputPercent();
     }
@@ -71,7 +71,7 @@ public class ModuleIOReal implements ModuleIO
     @Override
     public void setDrivePwrVelocityIO(double velocity)
     {
-        DRIVE_MOTOR.set(ControlMode.Velocity, velocity * velFF);
+        DRIVE_MOTOR.set(ControlMode.Velocity, - velocity * velFF);
     }
 
     @Override
